@@ -39,7 +39,8 @@ type OrderCancelResp struct {
 
 func OrderQuery(ctx context.Context, req *OrderQueryReq) (*OrderQueryResp, error) {
 	var os OrderService
-	cli, err := rpcx.NewClientByP2P(rpcx.HostPort{Proto: "tcp", Host: "localhost", Port: 9000}, os.HandleName())
+	// cli, err := rpcx.NewClientByP2P(rpcx.HostPort{Proto: "tcp", Host: "localhost", Port: 9000}, os.HandleName())
+	cli, err := rpcx.NewClientByConsul(rpcx.HostPort{Proto: "http", Host: "127.0.0.1", Port: 8500}, os.HandleName())
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,8 @@ func OrderQuery(ctx context.Context, req *OrderQueryReq) (*OrderQueryResp, error
 }
 func OrderSubmit(ctx context.Context, req *OrderSubmitReq) (*OrderSubmitResp, error) {
 	var os OrderService
-	cli, err := rpcx.NewClientByP2P(rpcx.HostPort{Proto: "tcp", Host: "localhost", Port: 9000}, os.HandleName())
+	// cli, err := rpcx.NewClientByP2P(rpcx.HostPort{Proto: "tcp", Host: "localhost", Port: 9000}, os.HandleName())
+	cli, err := rpcx.NewClientByConsul(rpcx.HostPort{Proto: "http", Host: "127.0.0.1", Port: 8500}, os.HandleName())
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +71,8 @@ func OrderSubmit(ctx context.Context, req *OrderSubmitReq) (*OrderSubmitResp, er
 }
 func OrderCancel(ctx context.Context, req *OrderCancelReq) (*OrderCancelResp, error) {
 	var os OrderService
-	cli, err := rpcx.NewClientByP2P(rpcx.HostPort{Proto: "tcp", Host: "localhost", Port: 9000}, os.HandleName())
+	// cli, err := rpcx.NewClientByP2P(rpcx.HostPort{Proto: "tcp", Host: "localhost", Port: 9000}, os.HandleName())
+	cli, err := rpcx.NewClientByConsul(rpcx.HostPort{Proto: "http", Host: "127.0.0.1", Port: 8500}, os.HandleName())
 	if err != nil {
 		return nil, err
 	}

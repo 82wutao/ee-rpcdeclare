@@ -28,8 +28,8 @@ func (hp HostPort) ProtoHostPort() string {
 		hp.Proto, hp.Host, hp.Port)
 }
 func (hp HostPort) HostPort() string {
-	return fmt.Sprintf("%s@%s:%d",
-		hp.Proto, hp.Host, hp.Port)
+	return fmt.Sprintf("%s:%d",
+		hp.Host, hp.Port)
 }
 
 type RPCXClient struct {
@@ -163,12 +163,16 @@ func NewServerAndRegisterConsul(serviceHost HostPort, handles []ServiceHandle,
 	serv.Plugins.Add(rp) //consul
 	// serv.Plugins.Add(nil) //trace
 
-	serv.RegisterOnRestart(onRestart)   // on restart
-	serv.RegisterOnShutdown(onShutdown) // on shutdown
+	serv.RegisterOnRestart(onRestart)
+	serv.RegisterOnShutdown(onShutdown)
 
 	for _, hanle := range handles {
 		if err := serv.RegisterName(hanle.HandleName(), hanle, ""); err != nil {
 			log.Fatalf("server regist service %s error %+v\n", hanle.HandleName(), err)
+			return nil, err
+		}
+		if err := rp.Register(hanle.HandleName(), hanle, ""); err != nil {
+			log.Fatalf("consul regist service %s error %+v\n", hanle.HandleName(), err)
 			return nil, err
 		}
 	}
