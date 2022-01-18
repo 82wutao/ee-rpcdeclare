@@ -8,6 +8,7 @@ import (
 	// "runtime/metrics"
 	"time"
 
+	"github.com/82wutao/ee-rpcdeclare/network"
 	"github.com/rcrowley/go-metrics"
 	"github.com/smallnest/rpcx/client"
 	"github.com/smallnest/rpcx/protocol"
@@ -16,21 +17,6 @@ import (
 )
 
 const _base_path string = "ee/rpc"
-
-type HostPort struct {
-	Host  string
-	Port  int16
-	Proto string // tcp/udp/http
-}
-
-func (hp HostPort) ProtoHostPort() string {
-	return fmt.Sprintf("%s@%s:%d",
-		hp.Proto, hp.Host, hp.Port)
-}
-func (hp HostPort) HostPort() string {
-	return fmt.Sprintf("%s:%d",
-		hp.Host, hp.Port)
-}
 
 type RPCXClient struct {
 	cli client.XClient
@@ -56,7 +42,7 @@ func (cli *RPCXClient) Close() error {
 	return cli.cli.Close()
 }
 
-func NewClientByP2P(rpcServer HostPort, serviceName string) (*RPCXClient, error) {
+func NewClientByP2P(rpcServer network.HostPort, serviceName string) (*RPCXClient, error) {
 	discovery, err := client.NewPeer2PeerDiscovery(rpcServer.ProtoHostPort(), "")
 	if err != nil {
 		return nil, err
@@ -66,7 +52,7 @@ func NewClientByP2P(rpcServer HostPort, serviceName string) (*RPCXClient, error)
 	return &RPCXClient{cli: xclient}, nil
 }
 
-func NewClientByConsul(consulServer HostPort, serviceName string) (*RPCXClient, error) {
+func NewClientByConsul(consulServer network.HostPort, serviceName string) (*RPCXClient, error) {
 	discovery, err := client.NewConsulDiscovery(_base_path, serviceName,
 		[]string{fmt.Sprintf("%s:%d", consulServer.Host, consulServer.Port)}, nil)
 	if err != nil {
@@ -92,7 +78,7 @@ type ServiceHandle interface {
 	HandleName() string
 }
 type RPCXServer struct {
-	addr HostPort
+	addr network.HostPort
 	serv *server.Server
 }
 
@@ -128,7 +114,7 @@ func (s *RPCXServer) Launch(ctx context.Context) error {
 	return nil
 }
 
-func NewServer(serviceHost HostPort, handles []ServiceHandle,
+func NewServer(serviceHost network.HostPort, handles []ServiceHandle,
 	onRestart, onShutdown func(s *server.Server)) (*RPCXServer, error) {
 	serv := server.NewServer()
 
@@ -144,8 +130,8 @@ func NewServer(serviceHost HostPort, handles []ServiceHandle,
 
 	return &RPCXServer{addr: serviceHost, serv: serv}, nil
 }
-func NewServerAndRegisterConsul(serviceHost HostPort, handles []ServiceHandle,
-	onRestart, onShutdown func(s *server.Server), consulHost HostPort) (*RPCXServer, error) {
+func NewServerAndRegisterConsul(serviceHost network.HostPort, handles []ServiceHandle,
+	onRestart, onShutdown func(s *server.Server), consulHost network.HostPort) (*RPCXServer, error) {
 
 	serv := server.NewServer()
 
